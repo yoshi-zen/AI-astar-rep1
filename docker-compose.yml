@@ -1,0 +1,9 @@
+version: "3.6"
+services:
+  java:
+    build: ./docker/java
+    ports:
+      - 8081:8081
+    tty: true
+    volumes:
+      - ./server/src:/usr/src:cached
