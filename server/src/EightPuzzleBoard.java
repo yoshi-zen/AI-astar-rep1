@@ -2,6 +2,7 @@ import java.util.*;
 
 public class EightPuzzleBoard {
   Integer[] board = new Integer[9];
+  int g;
 
   void setBoard(Integer[] board) {
     this.board = board;

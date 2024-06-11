@@ -3,6 +3,8 @@ import java.util.Arrays;
 public abstract class EightPuzzleManager {
   static final Integer[] answers = {1,2,3,8,0,4,7,6,5};
   static final Integer[] direction = {-3, 1, 3, -1};
+
+  int g = 0;
   
   public boolean ansCheck(Integer[] boards) {
     for (int i = 0; i < boards.length; i++) {

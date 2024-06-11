@@ -1,14 +1,6 @@
 import java.util.Arrays;
 
 public class EightPuzzleIDS extends EightPuzzleManager {
-  // public static void main(String[] args) {
-  //   // 初期盤面のインスタンスをnewして、内容読み込み
-  //   EightPuzzleBoard initBoard = new EightPuzzleBoard();
-  //   initBoard.readInitBoard();
-
-  //   dfs(initBoard, 2);
-  // }
-
   public void searchMethod(EightPuzzleBoard prevBoard, int depth) {
     prevBoard.printBoard();
     System.out.println("depth: " + depth);
@@ -21,7 +13,6 @@ public class EightPuzzleIDS extends EightPuzzleManager {
 
     // 最深部まで到達していたら終了
     if (depth == 0) return;
-
 
     int emptyIndex = Arrays.asList(prevBoard.board).indexOf(0);
     boolean[] availableDirection = {emptyIndex > 2, emptyIndex % 3 != 2, emptyIndex < 6, emptyIndex % 3 != 0};

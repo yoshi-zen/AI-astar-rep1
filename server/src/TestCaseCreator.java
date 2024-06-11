@@ -8,17 +8,14 @@ public class TestCaseCreator {
   static EightPuzzleBoard board;
   public static void main(String[] args) {
     try {
-      File file = new File("sample_output.txt");
+      File file = new File("sample_output5.txt");
       FileWriter filewriter = new FileWriter(file);
-      for (int i = 0; i < 20; i++) {
-        filewriter.write("testcase:" + String.valueOf(i+1) + "\r\n");
-        for (int j = 0; j < 200; j++) {
-          Integer[] testCase = createTestCase(i);
-          for (Integer direction : testCase) {
-            filewriter.write(String.valueOf(direction));
-          }
-          filewriter.write("\r\n");
+      for (int j = 0; j < 100; j++) {
+        Integer[] testCase = createTestCase(5);
+        for (Integer direction : testCase) {
+          filewriter.write(String.valueOf(direction));
         }
+        filewriter.write("\r\n");
       }
       filewriter.close();
     } catch (IOException e) {
@@ -31,10 +28,12 @@ public class TestCaseCreator {
     Integer[] directionList = {-3, 1, 3, -1};
     Random rand = new Random();
     int count = 0;
+    int direction = rand.nextInt(4);
     do {
       int emptyIndex = Arrays.asList(boardList).indexOf(0);
       boolean[] availableDirection = {emptyIndex > 2, emptyIndex % 3 != 2, emptyIndex < 6, emptyIndex % 3 != 0};
-      int direction = rand.nextInt(4);
+      availableDirection[direction] = false;
+      direction = rand.nextInt(4);
       if (availableDirection[direction]) {
         boardList[emptyIndex] = boardList[emptyIndex + directionList[direction]];
         boardList[emptyIndex + directionList[direction]] = 0;
