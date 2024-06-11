@@ -1,104 +1,135 @@
-import java.util.ArrayDeque;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Queue;
+import java.util.Collections;
+
+class Triple<A, B, C> {
+  private A first;
+  private B second;
+  private C third;
+
+  public Triple(A first, B second, C third) {
+    this.first = first;
+    this.second = second;
+    this.third = third;
+  }
+
+  public A getFirst() {
+    return first;
+  }
+
+  public void setFirst(A first) {
+    this.first = first;
+  }
+
+  public B getSecond() {
+    return second;
+  }
+
+  public void setSecond(B second) {
+    this.second = second;
+  }
+
+  public C getThird() {
+    return third;
+  }
+
+  public void setThird(C third) {
+    this.third = third;
+  }
+
+  @Override
+  public String toString() {
+    return "Triple{" +
+            "first=" + first +
+            ", second=" + second +
+            ", third=" + third +
+            '}';
+  }
+}
+
+class OpenList extends Triple<EightPuzzleBoard, EightPuzzleBoard, Integer> implements Serializable, Comparable<OpenList> {
+
+  public OpenList(EightPuzzleBoard next, EightPuzzleBoard prev, int heur) {
+    super(next, prev, heur);
+  }
+
+  @Override
+  public int compareTo(OpenList o) {
+    return this.getThird() - o.getThird();
+  }
+}
 
 public class EightPuzzleAstar extends EightPuzzleManager {
+
+  private static final int[] direction = {-3, 1, 3, -1}; // 上右下左の方向の移動
+
   public void searchMethod(EightPuzzleBoard initBoard, int depth) {
-    // ある深さで貯めておくキュー <盤面、スコア>保持
-    Queue<EightPuzzleBoard> openList = new ArrayDeque<>();
-    // 通った経路を貯めておく
-    ArrayList<Integer[]> closedList = new ArrayList<>();
-    
+    ArrayList<OpenList> openList = new ArrayList<>();
+    ArrayList<OpenList> closedList = new ArrayList<>();
+
     int f_depth = 0;
 
-    // ---- ボードとキューの初期化 ---
-    boolean flag = false;
-    openList.add(initBoard);
+    openList.add(new OpenList(initBoard, null, heuristic0(initBoard.board, 0)));
 
-    while (!flag) {
-      // 発見フラグが立つまで繰り返し
-      // まずキューに貯めてく
-      ArrayList<EightPuzzleBoard> depthBoards = new ArrayList<>();
-
-      // openが空なら失敗で
+    while (true) {
       if (openList.isEmpty()) {
-        break;
+        return;
       }
-      // ある深さにおいてキューに溜まっている盤面を全て吐き出す
-      while (!openList.isEmpty()) {
-        depthBoards.add(openList.poll());
-      } 
-      // ある深さにおける先読みとキュー積み
-      for (EightPuzzleBoard headBoard: depthBoards) {
-        if (ansCheck(headBoard.board)) {
-          flag = true;
-          System.out.println("深さ"+f_depth+"で発見！");
-          break;  // TODO: 深さを返せるようにしたい！
+
+      Collections.sort(openList);
+      OpenList targetBoard = openList.get(0);
+      openList.remove(0);
+
+      targetBoard.getFirst().printBoard();
+
+      if (ansCheck(targetBoard.getFirst().board)) {
+        targetBoard.getFirst().printBoard();
+        System.out.println("========== goal ==========");
+        return;
+      }
+
+      ArrayList<EightPuzzleBoard> tempBoardsList = new ArrayList<>();
+
+      int emptyIndex = Arrays.asList(targetBoard.getFirst().board).indexOf(0);
+      boolean[] availableDirection = {emptyIndex > 2, emptyIndex % 3 != 2, emptyIndex < 6, emptyIndex % 3 != 0};
+
+      for (int i = 0; i < 4; i++) {
+        if (availableDirection[i]) {
+          int directionDiff = direction[i];
+          Integer[] swappedBoardList = swapBoardIndex(emptyIndex, directionDiff, targetBoard.getFirst().board);
+          EightPuzzleBoard tempBoard = new EightPuzzleBoard();
+          tempBoard.board = Arrays.copyOf(swappedBoardList, swappedBoardList.length);
+          tempBoardsList.add(tempBoard);
         }
-        
-        // ★closedリストに追加
-        closedList.add(headBoard.board);
+      }
 
-        int min_heuristic = 100000;
-        int emptyIndex = Arrays.asList(headBoard.board).indexOf(0);
-        boolean[] availableDirection = {emptyIndex > 2, emptyIndex % 3 != 2, emptyIndex < 6, emptyIndex % 3 != 0};
+      closedList.add(targetBoard);
 
-        Integer[] heur_values = {-1, -1, -1, -1};
+      for (EightPuzzleBoard brd : tempBoardsList) {
+        if (!isClosedListContains(closedList, brd)) {
+          int heuris_value = heuristic0(brd.board, f_depth) + 1;
+          OpenList newOpenList = new OpenList(brd, targetBoard.getFirst(), heuris_value);
 
-        for (int i = 0; i < 4; i++) {
-          if (availableDirection[i]) {
-            // 各移動方向について、移動可能であれば先読みしてヒューリスティック関数計算
-            // その最小値についても同様に走査
-            int directionDiff = direction[i];
-            Integer[] swappedBoardList = swapBoardIndex(emptyIndex, directionDiff, headBoard.board);
-            
-            if (!isClosedListContains(closedList, swappedBoardList)) {
-              heur_values[i] = heuristic2(swappedBoardList, f_depth+1);
-              if (heur_values[i] < min_heuristic) {
-                min_heuristic = heur_values[i];
+          boolean foundInOpenList = false;
+          for (OpenList tmp : openList) {
+            if (Arrays.equals(tmp.getFirst().board, brd.board)) {
+              foundInOpenList = true;
+              if (heuris_value < tmp.getThird()) {
+                openList.remove(tmp);
+                openList.add(newOpenList);
+                break;
               }
             }
           }
-        }
 
-        // for (int i: heur_values) {
-        //   System.out.print(i + " ");
-        // }
-        // System.out.println();;
-
-        for (int i = 0; i < 4; i++) {
-          if (availableDirection[i]) {
-            int directionDiff = direction[i];
-            EightPuzzleBoard newBoard = new EightPuzzleBoard();
-            Integer[] swappedBoardList = swapBoardIndex(emptyIndex, directionDiff, headBoard.board);
-            newBoard.board = Arrays.copyOf(swappedBoardList, swappedBoardList.length);
-            
-            
-            // System.out.println("-----------------");
-            // System.out.println("heuristic:" + heur_values[i] + ", min_heur: " + min_heuristic);
-            // for (int bnum: newBoard.board) {
-            //   System.out.print(bnum + " ");
-            // }
-            // System.out.println();
-
-            // newBoard.printBoard();
-            
-            if (!isClosedListContains(closedList, swappedBoardList)) {
-              if (heur_values[i] == min_heuristic) {
-                openList.add(newBoard);
-                System.out.println("--------- selected --------");
-                newBoard.printBoard();
-              } else {
-                System.out.println("-----------------");
-                newBoard.printBoard();
-              }
-            }
-          }          
+          if (!foundInOpenList) {
+            openList.add(newOpenList);
+          }
         }
       }
+      System.out.println("========= depth: " + f_depth + "==========");
       f_depth++;
-      System.out.println("============= depth: " + f_depth + "============");
     }
   }
 
@@ -130,13 +161,19 @@ public class EightPuzzleAstar extends EightPuzzleManager {
     return ans + depth;
   }
 
-  static boolean isClosedListContains(ArrayList<Integer[]> closedList, Integer[] list) {
-    for (Integer[] closed: closedList) {
+  static boolean isClosedListContains(ArrayList<OpenList> closedList, EightPuzzleBoard brd) {
+    for (OpenList closedBrd : closedList) {
       boolean chker = true;
-      for (int i = 0; i < closed.length; i++) {
-        if (list[i] != closed[i]) chker = false;
+      EightPuzzleBoard closedBoard = closedBrd.getFirst();
+      for (int i = 0; i < closedBoard.board.length; i++) {
+        if (!closedBoard.board[i].equals(brd.board[i])) {
+          chker = false;
+          break;
+        }
       }
-      if (chker) return true;
+      if (chker) {
+        return true;
+      }
     }
     return false;
   }
