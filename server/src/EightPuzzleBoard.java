@@ -20,8 +20,13 @@ public class EightPuzzleBoard {
     sc.close();
   }
 
+  void setExampleBoard() {
+    Integer[] exampleBoard = {2,8,3,1,6,4,7,0,5};
+    setBoard(exampleBoard);
+  }
+
   void printBoard() {
-    for (int i = 0; i<3;i++) {
+    for (int i = 0; i < 3;i++) {
       for (int j = 0; j < 3; j++) {
         int displayNum = board[i*3+j];;
         if (displayNum == 0) {
