@@ -21,5 +21,5 @@ public abstract class EightPuzzleManager {
     return newBoardList;
   }
 
-  abstract void searchMethod(EightPuzzleBoard prevBoard, int depth);
+  abstract void searchMethod(EightPuzzleBoard prevBoard);
 }

@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class EightPuzzleHeuristicTest {
@@ -8,18 +9,26 @@ public class EightPuzzleHeuristicTest {
     board.board = Arrays.copyOf(testCase, testCase.length);
   }
 
-  void test() {
-    timeMeasure();
+  long test() {
+    return timeMeasure();
+    // return depthMeasure();
   }
 
   long timeMeasure() {
-    EightPuzzleAstar aStar = new Heuristic2();
+    EightPuzzleAstar aStar = new Heuristic0();
     long startTime = System.nanoTime();
-    aStar.searchMethod(board, 0);
+    aStar.searchMethod(board);
     long endTime = System.nanoTime();
-    System.out.println((endTime - startTime) + " ns");
+    // System.out.println(endTime - startTime);
+    // System.out.println(aStar.getCount());
 
-    return (endTime - startTime);
+    return aStar.getCount();
+  }
+
+  long depthMeasure() {
+    EightPuzzleAstar aStar = new Heuristic2();
+    aStar.searchMethod(board);
+    return aStar.getDepth();
   }
 }
 

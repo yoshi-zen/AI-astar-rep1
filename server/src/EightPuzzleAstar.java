@@ -61,7 +61,10 @@ class OpenList extends Triple<EightPuzzleBoard, EightPuzzleBoard, Integer> imple
 }
 
 public abstract class EightPuzzleAstar extends EightPuzzleManager {
-  public void searchMethod(EightPuzzleBoard initBoard, int depth) {
+  int count = 0;
+  int ansDepth = 0;
+
+  public void searchMethod(EightPuzzleBoard initBoard) {
     ArrayList<OpenList> openList = new ArrayList<>();
     ArrayList<OpenList> closedList = new ArrayList<>();
 
@@ -78,6 +81,7 @@ public abstract class EightPuzzleAstar extends EightPuzzleManager {
       openList.remove(0);
 
       if (ansCheck(targetBoard.getFirst().board)) {
+        ansDepth = targetBoard.getFirst().g;
         // targetBoard.getFirst().printBoard();
         // System.out.println("depth: " + targetBoard.getFirst().g);
         // System.out.println("========== goal ==========");
@@ -98,6 +102,8 @@ public abstract class EightPuzzleAstar extends EightPuzzleManager {
           tempBoard.g = targetBoard.getFirst().g + 1;
           tempBoard.board = Arrays.copyOf(swappedBoardList, swappedBoardList.length);
           tempBoardsList.add(tempBoard);
+
+          this.count++;
         }
 
       }
@@ -133,6 +139,14 @@ public abstract class EightPuzzleAstar extends EightPuzzleManager {
   }
 
   abstract int heuristic(Integer[] board, int depth);
+
+  public int getCount() {
+    return this.count;
+  } 
+
+  public int getDepth() {
+    return this.ansDepth;
+  }
 
   static boolean isClosedListContains(ArrayList<OpenList> closedList, EightPuzzleBoard brd) {
     for (OpenList closedBrd : closedList) {
